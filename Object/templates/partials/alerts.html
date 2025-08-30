@@ -1,0 +1,66 @@
+{% if messages %}
+{% load static %}
+<div id="notification" class="fixed bottom-4 right-4 z-50 space-y-4 hidden">
+    {% for message in messages %}
+    <div class="notification-alert transform transition-all duration-500 ease-in-out opacity-0 translate-y-4
+                {% if message.level_tag == 'error' %} bg-red-50 border-l-4 border-red-500 text-red-700
+                {% elif message.level_tag == 'success' %} bg-green-50 border-l-4 border-green-500 text-green-700
+                {% else %} bg-gray-50 border-l-4 border-gray-500 text-gray-700
+                {% endif %} rounded-lg shadow-lg p-4 max-w-sm w-full" role="alert" aria-live="assertive"
+        aria-atomic="true" data-timeout="5000"> <!-- 5-second timeout -->
+        <div class="flex items-center justify-between">
+            <div>
+                <strong class="font-semibold">
+                    {% if message.level_tag == 'error' %}
+                    Error:
+                    {% elif message.level_tag == 'success' %}
+                    Success:
+                    {% else %}
+                    {{ message.tags|title }}:
+                    {% endif %}
+                </strong>
+                <span>{{ message }}</span>
+            </div>
+            <button type="button" class="close ml-4 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                aria-label="Close" title="Close notification">
+                <span aria-hidden="true" class="text-xl">&times;</span>
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const notification = document.getElementById('notification');
+        const alerts = document.querySelectorAll('.notification-alert');
+
+        // Show notifications with fade-in animation
+        notification.classList.toggle('hidden');
+        alerts.forEach(alert => {
+            // Remove initial opacity and translate to make the toast visible
+            setTimeout(() => {
+                alert.classList.remove('opacity-0', 'translate-y-4');
+            }, 10); // Small delay to trigger the transition
+
+            // Function to remove a notification
+            function removeNotification(alert) {
+                alert.classList.add('opacity-0', 'translate-y-4'); // Fade out and slide down
+                setTimeout(() => alert.remove(), 500); // Remove after animation
+            }
+
+            // Add close button functionality
+            const closeButton = alert.querySelector('.close');
+            closeButton.addEventListener('click', () => {
+                removeNotification(alert);
+            });
+
+            // Auto-close after the specified timeout (5 seconds)
+            const timeoutDuration = parseInt(alert.getAttribute('data-timeout'), 10);
+            setTimeout(() => {
+                removeNotification(alert);
+            }, timeoutDuration + 500); // Add 500ms to account for the fade-in animation
+        });
+    });
+</script>
+{% endif %}

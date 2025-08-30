@@ -1,0 +1,43 @@
+.error-message {
+  color: #fff !important;
+  background: linear-gradient(135deg, #ff4d4f, #d9363e);
+  font-weight: bold;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(217, 54, 62, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.error-message:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(217, 54, 62, 0.4);
+}
+
+.success-message {
+  color: #fff !important;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  font-weight: bold;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.success-message:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(46, 125, 50, 0.4);
+}
+
+.alert {
+  background: linear-gradient(135deg, #f0f0f0, #fafafa) !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  padding: 12px 16px !important;
+  font-size: 0.95rem !important;
+  transition: box-shadow 0.2s ease;
+}
+
+.alert:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1) !important;
+}

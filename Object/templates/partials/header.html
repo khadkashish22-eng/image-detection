@@ -1,0 +1,52 @@
+{% load static %}
+<header class="bg-slate-100 text-gray-800 py-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center px-6">
+        <!-- Logo -->
+        <a href="{% url 'homepage' %}" class="text-xl font-semibold tracking-wide hover:text-yellow-600 transition duration-300">
+            PicScan
+        </a>
+
+        <!-- Navigation -->
+        <nav class="hidden md:flex space-x-4">
+            
+            <a href="{% url 'addpredict' %}"
+               class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-300">
+                Classifier
+            </a>
+            <a href="{% url 'prediction_history' %}"
+               class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-300">
+                History
+            </a>
+            <a href="{% url 'blogs' %}"
+               class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-300">
+                Blog
+            </a>
+        </nav>
+
+        <!-- Authentication -->
+        <div class="flex items-center space-x-4">
+            {% if user.is_authenticated %}
+            <a href="{% url 'user_details' %}"
+               class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-300">
+                {{ user.username }}
+            </a>
+            <form action="{% url 'logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit"
+                        class="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition duration-300">
+                    Logout
+                </button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}"
+               class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-300">
+                Sign In
+            </a>
+            <a href="{% url 'register' %}"
+               class="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition duration-300">
+                Register
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</header>

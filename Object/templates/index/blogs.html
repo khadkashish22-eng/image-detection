@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'partials/alerts.html' %}
+<section class="text-gray-800 body-font py-16 bg-gradient-to-br from-indigo-50 via-white to-purple-50 font-sans">
+  <div class="container mx-auto px-6 md:px-12">
+
+    <!-- Page Title -->
+    <h1 class="text-4xl md:text-6xl font-extrabold text-center mb-12 tracking-tight text-black animate-fade-in-up font-sans">
+      Understanding CNN for CIFAR-10
+    </h1>
+
+    <!-- Blog Content Card -->
+    <div class="max-w-4xl mx-auto rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-xl bg-white/80 ring-1 ring-gray-200 animate-fade-in-up delay-100 transition-all hover:shadow-3xl hover:scale-[1.01] duration-300 font-sans">
+
+      <!-- Section Headings -->
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">What is CIFAR-10?</h2>
+      <p class="text-gray-700 leading-relaxed mb-6">
+        The CIFAR-10 dataset is a collection of 60,000 32x32 color images in 10 classes...
+      </p>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">What is a Convolutional Neural Network (CNN)?</h2>
+      <p class="text-gray-700 mb-6">
+        A Convolutional Neural Network (CNN) is a deep learning algorithm specifically designed...
+      </p>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">How CNN Works for CIFAR-10</h2>
+      <ol class="list-decimal list-inside text-gray-700 mb-6 space-y-3">
+        <li><strong>Input Layer:</strong> Takes 32x32 RGB images as input.</li>
+        <li><strong>Convolutional Layers:</strong> Extract features like edges, textures, and patterns.</li>
+        <li><strong>ReLU Activation:</strong> Introduces non-linearity for complex pattern learning.</li>
+        <li><strong>Pooling Layers:</strong> Reduce feature map size to improve efficiency.</li>
+        <li><strong>Fully Connected Layers:</strong> Combine features for final prediction.</li>
+        <li><strong>Output Layer:</strong> Softmax layer outputs probabilities for each class.</li>
+      </ol>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">Key Components of CNN</h2>
+      <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
+        <li><strong>Filters/Kernels:</strong> Detect features like edges, corners, and textures.</li>
+        <li><strong>Stride:</strong> Step size of the filter while sliding across the image.</li>
+        <li><strong>Padding:</strong> Controls feature map size by adding borders.</li>
+        <li><strong>Pooling:</strong> Reduces dimensionality while keeping important info.</li>
+      </ul>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">Why CNN for CIFAR-10?</h2>
+      <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
+        <li>Automatically learns spatial hierarchies of features.</li>
+        <li>Computationally efficient due to pooling and weight sharing.</li>
+        <li>Achieves state-of-the-art accuracy on small image tasks.</li>
+      </ul>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">Challenges with CIFAR-10</h2>
+      <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
+        <li>Small image size limits fine detail capture.</li>
+        <li>High intra-class variability and inter-class similarity.</li>
+        <li>Limited dataset size increases overfitting risk.</li>
+      </ul>
+
+      <h2 class="text-2xl font-bold text-black mb-4 font-sans">Conclusion</h2>
+      <p class="text-gray-700">
+        CNNs are a powerful tool for image classification tasks like CIFAR-10...
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+  @keyframes fade-in-up {
+    0% {opacity: 0; transform: translateY(20px);}
+    100% {opacity: 1; transform: translateY(0);}
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+  .delay-100 { animation-delay: 0.1s; }
+</style>
+{% endblock %}

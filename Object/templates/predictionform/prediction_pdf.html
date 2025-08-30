@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Prediction History for {{ user.username }}</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>S.N</th>
+        <th>Image</th>
+        <th>Class A</th>
+        <th>Probability</th>
+        <th>Class B</th>
+        <th>Probability</th>
+        <th>Class C</th>
+        <th>Probability</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in predictions %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          {% if p.image_file %}
+          <img src="{{ p.image_file.url }}" alt="Prediction Image">
+          {% else %}
+          No Image
+          {% endif %}
+        </td>
+        <td>{{ p.class_1 }}</td>
+        <td>{{ p.prob_1 }}%</td>
+        <td>{{ p.class_2 }}</td>
+        <td>{{ p.prob_2 }}%</td>
+        <td>{{ p.class_3 }}</td>
+        <td>{{ p.prob_3 }}%</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8">No predictions found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+
+</html>

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+{% include 'partials/alerts.html' %}
+<section class="text-gray-800 body-font bg-gradient-to-br from-purple-50 to-blue-50 py-16">
+  <div class="container mx-auto px-5 flex flex-col items-center space-y-8">
+    <!-- Heading -->
+    <div class="text-center">
+      <h1 class="text-5xl font-bold text-gray-900 mb-4 leading-tight">
+        Object Prediction Results
+      </h1>
+      <p class="text-xl text-gray-600">Here's what the model predicts for your image.</p>
+    </div>
+
+    <!-- Uploaded Image -->
+    <div class="bg-white rounded-2xl shadow-2xl p-2">
+      <img src="{{ prediction.image_file.url }}" alt="Uploaded Image"
+        class="w-64 h-64 object-cover rounded-lg border-4 border-gray-100">
+    </div>
+
+    <!-- Prediction Result -->
+    <div class="text-center">
+      <h2 class="text-2xl font-semibold text-gray-800">
+        Looks like: <span class="text-blue-600">{{ prediction.class1 }}</span>
+      </h2>
+    </div>
+
+    <!-- Prediction Table -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="py-4 px-6 text-lg font-semibold text-gray-700">Rank</th>
+            <th class="py-4 px-6 text-lg font-semibold text-gray-700">Class</th>
+            <th class="py-4 px-6 text-lg font-semibold text-gray-700">Probability</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-all duration-200">
+            <td class="py-4 px-6 text-center text-gray-600">1<sup>st</sup></td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.class_1 }}</td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.prob_1 }}%</td>
+          </tr>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-all duration-200">
+            <td class="py-4 px-6 text-center text-gray-600">2<sup>nd</sup></td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.class_2 }}</td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.prob_2 }}%</td>
+          </tr>
+          <tr class="border-b border-gray-100 hover:bg-gray-50 transition-all duration-200">
+            <td class="py-4 px-6 text-center text-gray-600">3<sup>rd</sup></td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.class_3 }}</td>
+            <td class="py-4 px-6 text-center text-gray-600">{{ prediction.prob_3 }}%</td>
+          </tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Predict Again Button -->
+    <div class="mt-8">
+      <a href="{% url 'addpredict' %}"
+        class="inline-flex text-white bg-gradient-to-r from-blue-600 to-blue-700 border-0 py-3 px-8 focus:outline-none hover:from-blue-700 hover:to-blue-800 rounded-lg text-lg font-semibold shadow-lg transition-all duration-300 ease-in-out transform">
+        Predict Another Image
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+.error-message {
+  color: red !important;
+  font-weight: bold;
+}
+
+.success-message {
+  color: green !important;
+  font-weight: bold;
+}
+
+.alert {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'partials/alerts.html' %}
+
+<section
+    class="relative text-gray-800 body-font bg-gradient-to-br from-purple-100 via-blue-50 to-blue-100 py-20 overflow-hidden">
+    <div class="container mx-auto px-5 flex flex-col items-center relative z-10">
+
+        <!-- Welcome Message -->
+        <div class="text-center mb-12 animate-fade-in-up">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
+                Let’s Dive In!
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-xl mx-auto">
+                Let the machine predict the image with ease and accuracy.
+            </p>
+        </div>
+
+        <!-- Login Card -->
+        <div
+            class="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in-up delay-200 border border-white/40">
+            <h2 class="text-gray-900 text-3xl font-bold mb-8 text-center">Login</h2>
+
+            <form action="{% url 'login' %}" method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <input
+                        class="w-full bg-white/60 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition duration-200 ease-in-out"
+                        placeholder="Username" type="username" name="username" required />
+                </div>
+
+                <div>
+                    <input
+                        class="w-full bg-white/60 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition duration-200 ease-in-out"
+                        placeholder="Password" type="password" name="password" required />
+                </div>
+
+                {% if request.GET.next %}
+                    <input type="hidden" name="next" value="{{ request.GET.next }}" />
+                {% endif %}
+
+                <button
+                    class="w-full text-white bg-gradient-to-r from-blue-600 to-blue-700 py-3 px-8 rounded-lg text-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-300"
+                    type="submit">
+                    Login
+                </button>
+            </form>
+
+            <p class="text-sm text-gray-500 mt-6 text-center">
+                <a href="{% url 'reset_password' %}"
+                   class="text-blue-600 hover:text-blue-800 transition-colors">Forgot Password?</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Decorative Blobs -->
+    <div class="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-400 rounded-full blur-3xl opacity-20"></div>
+    <div class="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-blue-400 rounded-full blur-3xl opacity-20"></div>
+</section>
+
+<style>
+    @keyframes fade-in-up {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+    .delay-200 { animation-delay: 0.2s; }
+</style>
+
+{% endblock %}

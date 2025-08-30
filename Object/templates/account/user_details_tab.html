@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% include 'partials/alerts.html' %}
+<section class="text-gray-800 body-font bg-gradient-to-br from-purple-50 to-blue-50 py-16">
+  <div class="container mx-auto px-5">
+    <!-- Main Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto hover:shadow-2xl transition-shadow duration-300">
+      <h2 class="text-gray-900 text-3xl font-bold title-font mb-8 text-center">User Details</h2>
+
+      <!-- Tab Navigation -->
+      <div class="flex space-x-4 border-b border-gray-200 mb-8">
+        <button id="profile-tab"
+          class="tab-button py-2 px-4 text-lg font-semibold text-gray-600 hover:text-gray-900 focus:outline-none"
+          onclick="switchTab('profile')">
+          Own Profile
+        </button>
+        <button id="email-tab"
+          class="tab-button py-2 px-4 text-lg font-semibold text-gray-600 hover:text-gray-900 focus:outline-none"
+          onclick="switchTab('email')">
+          Change Email
+        </button>
+        <button id="password-tab"
+          class="tab-button py-2 px-4 text-lg font-semibold text-gray-600 hover:text-gray-900 focus:outline-none"
+          onclick="switchTab('password')">
+          Change Password
+        </button>
+      </div>
+
+      <!-- Tab Content -->
+      <div id="profile-content" class="tab-content">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Profile Information</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-700">Full Name</label>
+            <p class="text-gray-900">@{{ user.get_username }}</p>
+          </div>
+          <div>
+            <label class="block text-gray-700">Email</label>
+            <p class="text-gray-900">{{ user.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="email-content" class="tab-content hidden">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Change Email</h3>
+        <form method="POST" action="{% url 'user_details' %}">
+          {% csrf_token %}
+          {{ email_form|crispy }}
+          <button type="submit" name="change_email"
+            class="w-full text-white bg-gradient-to-r from-blue-600 to-blue-700 border-0 py-2 px-6 focus:outline-none hover:from-blue-700 hover:to-blue-800 rounded-lg text-lg font-semibold shadow-md transition-all duration-300 ease-in-out transform ">
+            Update Email
+          </button>
+        </form>
+      </div>
+
+      <div id="password-content" class="tab-content hidden">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Change Password</h3>
+        <form method="POST" action="{% url 'user_details' %}">
+          {% csrf_token %}
+          {{ password_form|crispy }}
+          <button type="submit" name="change_password"
+            class="w-full text-white bg-gradient-to-r from-blue-600 to-blue-700 border-0 py-2 px-6 focus:outline-none hover:from-blue-700 hover:to-blue-800 rounded-lg text-lg font-semibold shadow-md transition-all duration-300 ease-in-out transform ">
+            Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Smooth hover effect for the card */
+  .hover\:shadow-2xl:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Subtle scaling effect for buttons */
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+
+  /* Consistent focus state for inputs */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Active tab styling */
+  .tab-button.active {
+    color: #1a365d;
+    /* Dark blue */
+    border-bottom: 2px solid #1a365d;
+  }
+
+  /* Hidden tab content */
+  .tab-content.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  function switchTab(tabName) {
+    // Hide all tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.add('hidden');
+    });
+
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.classList.remove('active');
+    });
+
+    // Show the selected tab content
+    document.getElementById(`${tabName}-content`).classList.remove('hidden');
+
+    // Add active class to the selected tab
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+  }
+
+  // Set the default tab to "Own Profile"
+  document.addEventListener('DOMContentLoaded', function () {
+    switchTab('profile');
+  });
+</script>
+{% endblock %}

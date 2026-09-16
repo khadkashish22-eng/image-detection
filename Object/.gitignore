@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+*.log
+media/
+
+# Environment variables / secrets
+.env
+
+# Static files (collected at deploy time, don't need to commit)
+staticfiles/
+
+# OS/editor junk
+.vscode/
+.DS_Store
+Thumbs.db
+
+# uv
+.python-version

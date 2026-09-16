@@ -16,49 +16,56 @@
       <!-- Section Headings -->
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">What is CIFAR-10?</h2>
       <p class="text-gray-700 leading-relaxed mb-6">
-        The CIFAR-10 dataset is a collection of 60,000 32x32 color images in 10 classes...
+        The <strong>CIFAR-10</strong> dataset is a benchmark in computer vision, widely used for image classification research. 
+        It contains 60,000 color images of size 32×32 pixels, divided into 10 distinct classes: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck. 
+        There are 50,000 training images and 10,000 test images. Each image is RGB and low-resolution, making it a challenging dataset for fine detail recognition.
       </p>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">What is a Convolutional Neural Network (CNN)?</h2>
       <p class="text-gray-700 mb-6">
-        A Convolutional Neural Network (CNN) is a deep learning algorithm specifically designed...
+        A <strong>Convolutional Neural Network</strong> is a deep learning architecture designed to process and analyze visual data. 
+        It automatically learns spatial hierarchies of features — from simple edges to complex shapes — making it ideal for image classification tasks like CIFAR-10.
       </p>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">How CNN Works for CIFAR-10</h2>
       <ol class="list-decimal list-inside text-gray-700 mb-6 space-y-3">
-        <li><strong>Input Layer:</strong> Takes 32x32 RGB images as input.</li>
-        <li><strong>Convolutional Layers:</strong> Extract features like edges, textures, and patterns.</li>
-        <li><strong>ReLU Activation:</strong> Introduces non-linearity for complex pattern learning.</li>
-        <li><strong>Pooling Layers:</strong> Reduce feature map size to improve efficiency.</li>
-        <li><strong>Fully Connected Layers:</strong> Combine features for final prediction.</li>
-        <li><strong>Output Layer:</strong> Softmax layer outputs probabilities for each class.</li>
+        <li><strong>Input Layer:</strong> Accepts 32×32×3 (RGB) images.</li>
+        <li><strong>Convolutional Layers:</strong> Apply filters to detect features such as edges, textures, and patterns.</li>
+        <li><strong>ReLU Activation:</strong> Introduces non-linearity, enabling the network to learn complex patterns.</li>
+        <li><strong>Pooling Layers:</strong> Downsample feature maps (e.g., Max Pooling) to reduce computation and control overfitting.</li>
+        <li><strong>Fully Connected Layers:</strong> Combine extracted features to form high-level representations.</li>
+        <li><strong>Output Layer (Softmax):</strong> Produces probability scores for each of the 10 classes.</li>
       </ol>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">Key Components of CNN</h2>
       <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
-        <li><strong>Filters/Kernels:</strong> Detect features like edges, corners, and textures.</li>
-        <li><strong>Stride:</strong> Step size of the filter while sliding across the image.</li>
-        <li><strong>Padding:</strong> Controls feature map size by adding borders.</li>
-        <li><strong>Pooling:</strong> Reduces dimensionality while keeping important info.</li>
+        <li><strong>Filters/Kernels:</strong> Small matrices that detect specific patterns (edges, corners, textures).</li>
+        <li><strong>Stride:</strong> The step size when sliding the filter over the image.</li>
+        <li><strong>Padding:</strong> Adding borders to preserve spatial dimensions after convolution.</li>
+        <li><strong>Pooling:</strong> Reduces dimensionality while retaining important information (e.g., Max Pooling, Average Pooling).</li>
       </ul>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">Why CNN for CIFAR-10?</h2>
       <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
-        <li>Automatically learns spatial hierarchies of features.</li>
+        <li>Automatically learns spatial hierarchies of features without manual feature engineering.</li>
+        <li>Captures both low-level and high-level patterns effectively.</li>
         <li>Computationally efficient due to pooling and weight sharing.</li>
-        <li>Achieves state-of-the-art accuracy on small image tasks.</li>
+        <li>Proven to achieve high accuracy on small image classification tasks.</li>
       </ul>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">Challenges with CIFAR-10</h2>
       <ul class="list-disc list-inside text-gray-700 mb-6 space-y-3">
         <li>Small image size limits fine detail capture.</li>
-        <li>High intra-class variability and inter-class similarity.</li>
-        <li>Limited dataset size increases overfitting risk.</li>
+        <li>High intra-class variability — same class can look very different (e.g., different dog breeds).</li>
+        <li>High inter-class similarity — different classes may look similar (e.g., cat vs. dog).</li>
+        <li>Limited dataset size increases overfitting risk, requiring regularization techniques like dropout and data augmentation.</li>
       </ul>
 
       <h2 class="text-2xl font-bold text-black mb-4 font-sans">Conclusion</h2>
       <p class="text-gray-700">
-        CNNs are a powerful tool for image classification tasks like CIFAR-10...
+        CNNs are a <strong>powerful and efficient</strong> solution for CIFAR-10 classification. 
+        By stacking convolutional, activation, pooling, and fully connected layers, they can automatically learn robust features 
+        and achieve state-of-the-art performance, even on small, low-resolution images — provided that overfitting is managed effectively.
       </p>
     </div>
   </div>

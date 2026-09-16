@@ -2,50 +2,49 @@
 {% block content %}
 {% load static %}
 {% include 'partials/alerts.html' %}
-<section class="text-gray-800 body-font bg-gradient-to-br from-purple-50 to-blue-50 py-16">
+<section class="text-gray-800 body-font bg-white py-20">
     <div class="container mx-auto px-5 flex flex-col items-center">
-        <!-- Heading Section -->
-        <div class="text-center mb-12">
-            <h1 class="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+
+        <!-- Heading -->
+        <div class="text-center mb-10 max-w-lg">
+            <h1 class="text-3xl md:text-4xl font-semibold text-gray-900 mb-3">
                 Predict Your Image
             </h1>
-            <p class="text-xl text-gray-600">Upload an image and let the model predict its category.</p>
+            <p class="text-gray-500 text-base mb-4">
+                Upload an image to see what our model detects.
+            </p>
+            {% if model_accuracy %}
+            <span class="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-full">
+                {{ model_accuracy }}% accuracy on CIFAR-10
+            </span>
+            {% endif %}
         </div>
 
-        <!-- Upload Form -->
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-            <form class="space-y-6" action="{% url 'addpredict' %}" method="post" enctype="multipart/form-data">
+        <!-- Upload Card -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 w-full max-w-sm">
+            <form class="space-y-4" action="{% url 'addpredict' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div>
-                    <input
-                        class="w-full bg-white rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
-                        type="file" name="file" required />
-                </div>
+                <label class="block border-2 border-dashed border-gray-300 rounded-lg px-4 py-8 text-center cursor-pointer hover:border-gray-400 transition-colors">
+                    <input type="file" name="file" required class="hidden" onchange="this.closest('label').querySelector('span').textContent = this.files[0]?.name || 'Choose a file'" />
+                    <span class="text-gray-500 text-sm">Choose a file</span>
+                </label>
                 <button
-                    class="w-full text-white bg-gradient-to-r from-blue-600 to-blue-700 border-0 py-3 px-8 focus:outline-none hover:from-blue-700 hover:to-blue-800 rounded-lg text-lg font-semibold shadow-lg transition-all duration-300 ease-in-out transform"
+                    class="w-full text-white bg-gray-900 hover:bg-gray-800 rounded-lg py-2.5 text-sm font-medium transition-colors"
                     type="submit">
-                    Upload and Predict
+                    Predict
                 </button>
             </form>
             {% if error %}
-            <div class="mt-6 text-center">
-                <p class="text-red-500 text-sm font-semibold">
-                    {{ error }}
-                </p>
-            </div>
+            <p class="mt-4 text-center text-red-500 text-sm">
+                {{ error }}
+            </p>
             {% endif %}
         </div>
 
         <!-- Dataset Info -->
-        <div class="mt-12 text-center max-w-2xl">
-            <p class="text-green-500 text-lg">
-                The model was trained on the CIFAR-10 dataset and performs best when the following image categories are
-                provided as input:
-            </p>
-            <p class="text-orange-500 text-lg mt-4 font-medium">
-                dog, cat, horse, deer, frog, airplane, truck, automobile, ship, bird
-            </p>
-        </div>
+        <p class="mt-8 text-gray-400 text-sm text-center max-w-md">
+            Works best with: dog, cat, horse, deer, frog, airplane, truck, automobile, ship, bird
+        </p>
     </div>
 </section>
 {% endblock %}

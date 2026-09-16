@@ -1,66 +1,145 @@
+"""
+PicScan - CNN vs ResNet-56 Comparison
+=========================================
+Runs both models on every upload. Saves the winning model's top-4
+predictions to the database (same shape as before, so views.py and
+the Prediction model don't need to change), and also returns a
+comparison dict for display on the result page.
+
+Accepts a wide range of common image formats.
+"""
+
 import os
 
 import numpy as np
-from tensorflow.keras.applications.efficientnet import preprocess_input
+import torch
+from PIL import Image
+from torchvision import transforms
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 
-
-# from PIL import Image
-# from skimage.metrics import structural_similarity as ssim
-# from tensorflow.keras.datasets import cifar10
-# import numpy as np
-
-# suppress TensorFlow logs: 2: Filters out INFO and WARNING messages, 1: Filters out INFO messages
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-
-# Define the base directory and load the model once
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "model_100.keras")
-model = load_model(MODEL_PATH)
 
-# Allowed file extensions
-ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "jfif"}
-
-# Class labels
 CLASSES = [
-    "airplane",
-    "automobile",
-    "bird",
-    "cat",
-    "deer",
-    "dog",
-    "frog",
-    "horse",
-    "ship",
-    "truck",
+    "airplane", "automobile", "bird", "cat", "deer",
+    "dog", "frog", "horse", "ship", "truck",
 ]
+
+# Broad set of common image formats. Note: HEIC (default iPhone photo
+# format) is NOT included here - Pillow can't open it without an extra
+# library (pillow-heif). If you need HEIC support, install that
+# separately and add "heic"/"heif" to this set.
+ALLOWED_EXTENSIONS = {
+    "jpg", "jpeg", "jfif", "png", "webp", "bmp",
+    "gif", "tiff", "tif", "ico", "pgm", "ppm",
+}
+
+# Shown on the form page as before
+MODEL_ACCURACY = 87.32  # your CNN's verified test accuracy
 
 
 def allowed_file(filename):
-    """Check if the filename has an allowed extension."""
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def preprocess_image(filename):
-    """Load and preprocess the image for model prediction."""
-    img = load_img(filename, target_size=(32, 32))  # Resize to 32x32
-    img = img_to_array(img) / 255.0  # Normalize pixel values
-    img = preprocess_input(img)  # EfficientNet-specific preprocessing
-    return np.expand_dims(img, axis=0)  # Reshape for model input
+# ---------------------------------------------------------------------------
+# Load both models once, when this module is first imported
+# ---------------------------------------------------------------------------
+CNN_MODEL_PATH = os.path.join(BASE_DIR, "picscan_best_model.keras")
+cnn_model = load_model(CNN_MODEL_PATH)
+
+resnet_model = torch.hub.load(
+    "chenyaofo/pytorch-cifar-models",
+    "cifar10_resnet56",
+    pretrained=True,
+)
+resnet_model.eval()
+
+resnet_transform = transforms.Compose([
+    transforms.Resize((32, 32)),
+    transforms.ToTensor(),
+    transforms.Normalize(
+        mean=(0.4914, 0.4822, 0.4465),
+        std=(0.247, 0.243, 0.261),
+    ),
+])
 
 
-def predict(filename):
-    """Predict the top 4 classes for the given image."""
-    img = preprocess_image(filename)
-    predictions = model.predict(img)[0]  # Get the first result from batch
+def _load_as_rgb(filename):
+    """
+    Opens ANY Pillow-supported image format (jpg, png, webp, bmp, gif,
+    tiff, etc.) and converts it to RGB. This handles images that are
+    grayscale, have a transparency channel (RGBA), or are palette-based
+    (like some PNGs/GIFs) - all normalized to plain RGB before the
+    models ever see them.
+    """
+    img = Image.open(filename)
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    return img
 
-    # Get top 4 predictions
-    top_indices = np.argsort(predictions)[::-1][:4]  # Get top 4 predictions
-    # top_indices = np.argsort(predictions)[-4:][::-1]  # Sort and get top 4 indices
+
+# ---------------------------------------------------------------------------
+# Individual model predictions - each returns top-4 classes + probabilities
+# ---------------------------------------------------------------------------
+def _predict_cnn_top4(filename):
+    img = _load_as_rgb(filename).resize((32, 32))
+    img = img_to_array(img) / 255.0
+    img = np.expand_dims(img, axis=0)
+
+    predictions = cnn_model.predict(img, verbose=0)[0]
+    top_indices = np.argsort(predictions)[::-1][:4]
+
     top_classes = [CLASSES[i] for i in top_indices]
-    top_probs = [round(predictions[i] * 100, 2) for i in top_indices]
-
+    top_probs = [round(float(predictions[i]) * 100, 2) for i in top_indices]
     return top_classes, top_probs
 
+
+def _predict_resnet_top4(filename):
+    img = _load_as_rgb(filename)
+    img_tensor = resnet_transform(img).unsqueeze(0)
+
+    with torch.no_grad():
+        outputs = resnet_model(img_tensor)
+        probabilities = torch.nn.functional.softmax(outputs, dim=1)[0]
+
+    top_indices = torch.argsort(probabilities, descending=True)[:4]
+
+    top_classes = [CLASSES[i] for i in top_indices]
+    top_probs = [round(float(probabilities[i]) * 100, 2) for i in top_indices]
+    return top_classes, top_probs
+
+
+# ---------------------------------------------------------------------------
+# Main entry point - matches the original predict(filename) signature
+# ---------------------------------------------------------------------------
+def predict(filename):
+    """
+    Returns (class_result, prob_result, comparison):
+      - class_result, prob_result: top-4 from the WINNING model
+        (same shape as before, so process_and_save_prediction and the
+        Prediction model don't need to change)
+      - comparison: dict with both models' top prediction + confidence,
+        for display only (not saved to the database)
+    """
+    cnn_classes, cnn_probs = _predict_cnn_top4(filename)
+    resnet_classes, resnet_probs = _predict_resnet_top4(filename)
+
+    cnn_top1 = {"model_name": "Custom CNN", "predicted_class": cnn_classes[0], "confidence": cnn_probs[0]}
+    resnet_top1 = {"model_name": "ResNet-56 (pretrained)", "predicted_class": resnet_classes[0], "confidence": resnet_probs[0]}
+
+    comparison = {
+        "results": sorted([cnn_top1, resnet_top1], key=lambda r: r["confidence"], reverse=True),
+    }
+    comparison["winner_model"] = comparison["results"][0]["model_name"]
+    comparison["winner_class"] = comparison["results"][0]["predicted_class"]
+    comparison["winner_confidence"] = comparison["results"][0]["confidence"]
+
+    if comparison["winner_model"] == "Custom CNN":
+        class_result, prob_result = cnn_classes, cnn_probs
+    else:
+        class_result, prob_result = resnet_classes, resnet_probs
+
+    return class_result, prob_result, comparison

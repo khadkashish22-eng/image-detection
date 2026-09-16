@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 import requests
 from .models import Prediction
-from .naive import allowed_file, predict
+from .naive import MODEL_ACCURACY, allowed_file, predict
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -67,9 +67,9 @@ def addpredict(request):  # noqa: C901
     def process_and_save_prediction(img, user):
         img_full_path = os.path.join(settings.MEDIA_ROOT, "images", img)
         if not os.path.exists(img_full_path):
-            return None, "The image file was not found."
+            return None, None, "The image file was not found."
 
-        class_result, prob_result = predict(img_full_path)
+        class_result, prob_result, comparison = predict(img_full_path)
         prediction = Prediction(
             submitted_by=user,
             image_file=f"images/{img}",
@@ -83,10 +83,14 @@ def addpredict(request):  # noqa: C901
             prob_4=prob_result[3],
         )
         prediction.save()
-        return prediction, None
+        return prediction, comparison, None
 
     if request.method != "POST":
-        return render(request, "predictionform/form.html", {"error": ""})
+        return render(
+            request,
+            "predictionform/form.html",
+            {"error": "", "model_accuracy": MODEL_ACCURACY},
+        )
 
     user_data = {
         "username": request.user.username,
@@ -97,23 +101,37 @@ def addpredict(request):  # noqa: C901
     img, error = get_image_from_request(request, user_data, target_dir)
     if error:
         messages.error(request, error)
-        return render(request, "predictionform/form.html", {"error": error})
+        return render(
+            request,
+            "predictionform/form.html",
+            {"error": error, "model_accuracy": MODEL_ACCURACY},
+        )
 
     try:
-        prediction, error = process_and_save_prediction(img, request.user)
+        prediction, comparison, error = process_and_save_prediction(img, request.user)
         if error:
             messages.error(request, error)
-            return render(request, "predictionform/form.html", {"error": error})
+            return render(
+                request,
+                "predictionform/form.html",
+                {"error": error, "model_accuracy": MODEL_ACCURACY},
+            )
         messages.success(request, "Your prediction has been submitted successfully.")
         return render(
-            request, "predictionform/success.html", {"prediction": prediction}
+            request,
+            "predictionform/success.html",
+            {
+                "prediction": prediction,
+                "model_accuracy": MODEL_ACCURACY,
+                "comparison": comparison,
+            },
         )
     except Exception as e:
         messages.error(request, f"Error processing image: {e}")
         return render(
             request,
             "predictionform/form.html",
-            {"error": f"Error processing image: {e}"},
+            {"error": f"Error processing image: {e}", "model_accuracy": MODEL_ACCURACY},
         )
 
 
@@ -239,13 +257,9 @@ def export_pdf(request):  # noqa: C901, PLR0915
 @user_passes_test(lambda u: u.is_superuser, login_url="/account/login")
 def admin_dashboard(request):  # noqa: PLR0914
     """Admin dashboard with overview of key metrics."""
-    # Total users
     total_users = User.objects.count()
-
-    # Total predictions
     total_predictions = Prediction.objects.count()
 
-    # Average predictions per user
     total_active_users = (
         User.objects.filter(prediction__isnull=False).distinct().count()
     )
@@ -255,7 +269,6 @@ def admin_dashboard(request):  # noqa: PLR0914
         else 0
     )
 
-    # Most predicted class (based on class_1)
     most_predicted = (
         Prediction.objects.exclude(class_1__isnull=True)
         .values("class_1")
@@ -265,12 +278,10 @@ def admin_dashboard(request):  # noqa: PLR0914
     )
     most_predicted_class = most_predicted["class_1"] if most_predicted else "N/A"
 
-    # Recent predictions (last 5)
     recent_predictions = Prediction.objects.select_related("submitted_by").order_by(
         "-uploaded_at"
     )[:5]
 
-    # Predictions over the last 7 days for the chart
     today = timezone.now()
     start_date = today - timedelta(days=7)
     prediction_counts_by_date = (
@@ -288,11 +299,8 @@ def admin_dashboard(request):  # noqa: PLR0914
         chart_labels.append(date.strftime("%Y-%m-%d"))
         chart_data.append(date_counts.get(date, 0))
 
-    # New Stats
-    # Recent user registrations (last 7 days)
     recent_users = User.objects.filter(date_joined__gte=start_date).count()
 
-    # Top active users (top 5 by prediction count)
     top_active_users = (
         User.objects.filter(prediction__isnull=False)
         .annotate(prediction_count=Count("prediction"))
@@ -310,5 +318,6 @@ def admin_dashboard(request):  # noqa: PLR0914
         "chart_data": json.dumps(chart_data),
         "recent_users": recent_users,
         "top_active_users": top_active_users,
+        "model_accuracy": MODEL_ACCURACY,
     }
     return render(request, "index/dashboard.html", context)

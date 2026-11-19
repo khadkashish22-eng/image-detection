@@ -27,6 +27,11 @@ ALLOWED_HOSTS = [
     "localhost",
     "192.168.1.68",
     "192.168.254.5",
+    "192.168.61.236",
+    "169.254.36.194",
+    "192.168.137.253"
+
+
 ]
 
 
@@ -123,6 +128,7 @@ MESSAGE_TAGS = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+LOGIN_URL = "login"
 
 
 X_FRAME_OPTIONS = "DENY"

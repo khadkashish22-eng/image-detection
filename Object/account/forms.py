@@ -15,6 +15,8 @@ class EmailChangeForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get("email").strip().lower()
-        if User.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
-            raise ValidationError("Invalid email format. Please try again.")
+        if not email:
+            raise ValidationError("Email is required.")
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("An account with this email already exists.")
         return email

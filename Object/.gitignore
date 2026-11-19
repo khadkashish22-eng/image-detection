@@ -24,3 +24,6 @@ Thumbs.db
 
 # uv
 .python-version
+# Local portable Python runtime
+.python-runtime/
+python-runtime.zip

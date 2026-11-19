@@ -10,6 +10,7 @@ Accepts a wide range of common image formats.
 """
 
 import os
+from functools import lru_cache
 
 import numpy as np
 import torch
@@ -48,14 +49,18 @@ def allowed_file(filename):
 # Load both models once, when this module is first imported
 # ---------------------------------------------------------------------------
 CNN_MODEL_PATH = os.path.join(BASE_DIR, "picscan_best_model.keras")
-cnn_model = load_model(CNN_MODEL_PATH)
+@lru_cache(maxsize=1)
+def get_cnn_model():
+    return load_model(CNN_MODEL_PATH)
 
-resnet_model = torch.hub.load(
-    "chenyaofo/pytorch-cifar-models",
-    "cifar10_resnet56",
-    pretrained=True,
-)
-resnet_model.eval()
+
+@lru_cache(maxsize=1)
+def get_resnet_model():
+    model = torch.hub.load(
+        "chenyaofo/pytorch-cifar-models", "cifar10_resnet56", pretrained=True
+    )
+    model.eval()
+    return model
 
 resnet_transform = transforms.Compose([
     transforms.Resize((32, 32)),
@@ -75,10 +80,8 @@ def _load_as_rgb(filename):
     (like some PNGs/GIFs) - all normalized to plain RGB before the
     models ever see them.
     """
-    img = Image.open(filename)
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-    return img
+    with Image.open(filename) as img:
+        return img.convert("RGB")
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +92,7 @@ def _predict_cnn_top4(filename):
     img = img_to_array(img) / 255.0
     img = np.expand_dims(img, axis=0)
 
-    predictions = cnn_model.predict(img, verbose=0)[0]
+    predictions = get_cnn_model().predict(img, verbose=0)[0]
     top_indices = np.argsort(predictions)[::-1][:4]
 
     top_classes = [CLASSES[i] for i in top_indices]
@@ -102,7 +105,7 @@ def _predict_resnet_top4(filename):
     img_tensor = resnet_transform(img).unsqueeze(0)
 
     with torch.no_grad():
-        outputs = resnet_model(img_tensor)
+        outputs = get_resnet_model()(img_tensor)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)[0]
 
     top_indices = torch.argsort(probabilities, descending=True)[:4]

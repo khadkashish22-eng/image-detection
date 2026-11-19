@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.views import View
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 # Create your views here.
@@ -35,8 +36,8 @@ def register(request):
         last_name = request.POST.get("last_name", "").strip()
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
-        password = request.POST.get("password", "").strip()
-        password2 = request.POST.get("password2", "").strip()
+        password = request.POST.get("password", "")
+        password2 = request.POST.get("password2", "")
 
         # Validate all inputs
         error_message = None
@@ -49,7 +50,7 @@ def register(request):
         elif not re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", email):
             error_message = "Invalid email format."
         elif (
-            len(password) < 4
+            len(password) < 8
             or not re.search(r"\d", password)
             or not re.search(r"[A-Za-z]", password)
         ):
@@ -58,7 +59,7 @@ def register(request):
             error_message = "Passwords do not match."
         elif (
             User.objects.filter(username=username).exists()
-            or User.objects.filter(email=email).exists()
+            or User.objects.filter(email__iexact=email).exists()
         ):
             error_message = "User with this username or email already exists."
 
@@ -101,10 +102,14 @@ class Login(View):
             login(request, user)
             request.session["user_id"] = user.id
             messages.success(request, "You are now logged in!")
-            next_url = request.POST.get("next", "homepage")
-            return redirect(next_url)
+            next_url = request.POST.get("next", "")
+            if url_has_allowed_host_and_scheme(
+                next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+            ):
+                return redirect(next_url)
+            return redirect("homepage")
         messages.error(request, "Invalid username or password.")
-        return render(request, "account/login.html", {"form": form})
+        return render(request, "account/login.html", {"form": form, "next": request.POST.get("next", "")})
 
 
 def logout_view(request):
@@ -149,14 +154,13 @@ def user_details(request):
             email_form = EmailChangeForm(request.POST, instance=user)
             if email_form.is_valid():
                 new_email = email_form.cleaned_data["email"].strip()
-                user.refresh_from_db()
-                if new_email and new_email != user.email:
-                    user.email = new_email
-                    user.save(update_fields=["email"])
+                if new_email and email_form.has_changed():
+                    email_form.save()
                     messages.success(request, "Your email was successfully updated!")
                     return redirect("user_details")
                 messages.info(request, "No changes were made to your email.")
-            messages.error(request, "Please correct the errors below.")
+            else:
+                messages.error(request, "Please correct the errors below.")
 
     context = {
         "user": user,

@@ -7,7 +7,6 @@ from urllib.parse import urlparse
 
 import requests
 from .models import Prediction
-from .naive import MODEL_ACCURACY, allowed_file, predict
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -20,9 +19,26 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from PIL import Image
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
+
+
+MODEL_ACCURACY = 87.32
+
+
+def predict(filename):
+    # Keep ML dependencies and network downloads out of normal page requests.
+    from .naive import predict as run_prediction
+
+    return run_prediction(filename)
+
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in {
+        "jpg", "jpeg", "jfif", "png", "webp", "bmp", "gif", "tiff",
+        "tif", "ico", "pgm", "ppm",
+    }
 
 
 @login_required(login_url="/account/login")
@@ -53,7 +69,7 @@ def addpredict(request):  # noqa: C901
         if "file" in request.FILES:
             uploaded_file = request.FILES["file"]
             if not allowed_file(uploaded_file.name):
-                return None, "Invalid file format. Only JPG, JPEG, and PNG are allowed."
+                return None, "Unsupported image format. Please upload a supported image."
 
             file_ext = uploaded_file.name.split(".")[-1].lower()
             img_name = f"{user_data['unique_filename']}.{file_ext}"
@@ -181,8 +197,9 @@ def export_pdf(request):  # noqa: C901, PLR0915
         return HttpResponse("No data available", content_type="text/plain")
 
     buffer = BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-    _, letter_height = letter
+    page_size = landscape(letter)
+    pdf = canvas.Canvas(buffer, pagesize=page_size)
+    _, letter_height = page_size
 
     def setup_pdf_canvas():
         pdf.setTitle("Prediction History")
@@ -193,12 +210,9 @@ def export_pdf(request):  # noqa: C901, PLR0915
         pdf.setFont("Helvetica-Bold", 12)
         pdf.drawString(20, y_pos, "S.N")
         pdf.drawString(95, y_pos, "Image")
-        pdf.drawString(225, y_pos, "Class A")
-        pdf.drawString(325, y_pos, "Probability A")
-        pdf.drawString(425, y_pos, "Class B")
-        pdf.drawString(525, y_pos, "Probability B")
-        pdf.drawString(625, y_pos, "Class C")
-        pdf.drawString(725, y_pos, "Probability C")
+        for rank, x_pos in enumerate((170, 320, 470, 620), start=1):
+            pdf.drawString(x_pos, y_pos, f"Class {rank} / Probability")
+        pdf.setFont("Helvetica", 12)
 
     def draw_prediction_row(index, prediction, y_pos):
         pdf.drawString(20, y_pos, str(index))
@@ -218,12 +232,11 @@ def export_pdf(request):  # noqa: C901, PLR0915
             except Exception as e:
                 pdf.drawString(95, y_pos, "[Error: Img]")
                 messages.warning(request, f"Error loading image: {e}")
-        pdf.drawString(225, y_pos, prediction.class_1 or "")
-        pdf.drawString(325, y_pos, f"{prediction.prob_1}%" if prediction.prob_1 else "")
-        pdf.drawString(425, y_pos, prediction.class_2 or "")
-        pdf.drawString(525, y_pos, f"{prediction.prob_2}%" if prediction.prob_2 else "")
-        pdf.drawString(625, y_pos, prediction.class_3 or "")
-        pdf.drawString(725, y_pos, f"{prediction.prob_3}%" if prediction.prob_3 else "")
+        for rank, x_pos in enumerate((170, 320, 470, 620), start=1):
+            label = getattr(prediction, f"class_{rank}") or ""
+            probability = getattr(prediction, f"prob_{rank}")
+            value = f"{probability}%" if probability is not None else ""
+            pdf.drawString(x_pos, y_pos, f"{label} {value}".strip())
 
     def create_pdf_response(buffer):
         buffer.seek(0)

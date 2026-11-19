@@ -21,7 +21,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 from account import views as account_views
-from prediction import views
 
 
 urlpatterns = [
@@ -31,7 +30,6 @@ urlpatterns = [
     path("account/", include("account.urls")),
     path("prediction/", include("prediction.urls")),
     #path("dashboard/", views.admin_dashboard, name="dashboard"),
-    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
 
 if settings.DEBUG:
